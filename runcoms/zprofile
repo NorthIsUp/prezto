@@ -5,3 +5,70 @@
 #   Sorin Ionescu <sorin.ionescu@gmail.com>
 #
 
+setopt nullglob
+
+BREW=/usr/local/bin/brew
+
+# PYTHON
+export PYTHONDONTWRITEBYTECODE
+
+# ===========================
+# = Configure shell options =
+# ===========================
+export EDITOR="vim"
+
+# ============================
+# = Export formats and flags =
+# ============================
+export HISTIGNORE="&:ls:[bf]g:exit:ll:h"
+export VIRTUALENVWRAPPER_PYTHON=$(${BREW} --prefix python)/bin/python
+export WORKON_HOME=$HOME/.virtualenvs
+export VIRTUAL_ENV_DISABLE_PROMPT=true
+export PIP_USE_MIRRORS=true
+
+# ========================
+# = (CD|MAN|PKG|ETC)PATH =
+# ========================
+
+PREV_PATH=$PATH
+PATH=""
+PATHS=( \
+    $(${BREW} --prefix coreutils)/bin
+    $(${BREW} --prefix python)/bin \
+    /usr/X11R6/bin \
+    /sbin \
+    /usr/sbin \
+    /usr/local/share/python \
+    ${HOME}/sw/bin \
+    /usr/local/bin \
+    /usr/local/sbin \
+    /Developer/usr/bin \
+    /usr/bin \
+    /bin \
+    )
+
+
+SOURCES=( \
+    ${HOME}/.alias \
+    ${HOME}/.function \
+    $(${BREW} --prefix grc)/etc/grc.bashrc \
+    )
+SSH_KEYS=( ~/.ssh/id_*[^pub] )
+
+for PATH_ITEM in ${PATHS[@]}; do
+    [ -d ${PATH_ITEM} ] && PATH=$PATH:$PATH_ITEM
+done;
+
+PATH=$PATH:$PREV_PATH
+export PATH
+export MANPATH
+
+for SOURCE in ${SOURCES[@]}; do
+    [ -f ${SOURCE} ] && source $SOURCE
+done;
+
+for KEY in ${SSH_KEYS[@]}; do
+    [ -f ${KEY} ] && ssh-add -k ${KEY} 2&> /dev/null
+done;
+
+unsetopt nullglob
