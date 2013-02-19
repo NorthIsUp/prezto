@@ -12,3 +12,42 @@ fi
 
 # Customize to your needs...
 
+note_report()
+{
+  [ $note_command ] && (blink1-tool --id=1 --blink 2 > /dev/null &)
+  [ $note_command ] && (terminal-notifier -title "$note_command" -message "completed in $1 seconds" > /dev/null &)
+}
+
+preexec()
+{
+  if [ "$TTY" ]; then
+    note_remind="$SECONDS"
+    note_command="$2"
+  fi
+}
+
+precmd()
+{
+  if [ $TTY ] && [ $note_remind ] && [ $TTYIDLE -ge ${REPORTTIME:-3} ]; then
+    note_report $(( $SECONDS - $note_remind ))
+  fi
+}
+
+color_err () {
+  zmodload zsh/terminfo zsh/system
+  autoload colors
+
+  ## sysread & syswrite are part of zsh/system
+  if [[ "${terminfo[colors]}" -ge 8 ]] { colors }
+
+  while sysread std_err_color; do
+    syswrite -o 2 "${FX[bold]}${std_err_color}$reset_color"
+  done
+}
+
+## i'm not sure exactly how far back it's safe to go with this
+## 4.3.4 works; 4.2.1 hangs.
+autoload is-at-least
+#is-at-least 4.3.4 && exec 2> >( color_err )
+
+
