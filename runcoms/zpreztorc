@@ -33,11 +33,10 @@ zstyle ':prezto:load' pmodule \
   'spectrum' \
   'utility' \
   'completion' \
-  'autojump' \
+  'fasd' \
   'osx' \
   'git' \
   'python' \
-  'virtualenvwrapper' \
   'syntax-highlighting' \
   'history-substring-search' \
   'prompt'
