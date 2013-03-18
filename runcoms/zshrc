@@ -10,6 +10,10 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
   source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
 fi
 
+if [[ -s "${HOME}/.profile" ]]; then
+  source "${HOME}/.profile"
+fi
+
 # Customize to your needs...
 
 note_report()
@@ -50,4 +54,5 @@ color_err () {
 autoload is-at-least
 #is-at-least 4.3.4 && exec 2> >( color_err )
 
-
+alias j='fasd_cd'
+alias ji='fasd_cd -i'
