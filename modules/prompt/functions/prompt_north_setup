@@ -1,0 +1,81 @@
+#
+# A simple theme that displays relevant, contextual information.
+#
+# Authors:
+#   adam hitchcock <adam@northisup.com>
+#
+# Screenshots:
+#   http://i.imgur.com/nBEEZ.png
+#
+
+# Load dependencies.
+pmodload 'helper'
+
+function prompt_north_precmd {
+  setopt LOCAL_OPTIONS
+  unsetopt XTRACE KSH_ARRAYS
+
+  (( $+functions[git-info] )) && git-info
+  (( $+functions[workon_cwd] )) && workon_cwd
+  (( $+functions[python-info] )) && python-info
+}
+
+function prompt_north_setup {
+  setopt LOCAL_OPTIONS
+  unsetopt XTRACE KSH_ARRAYS
+  prompt_opts=(cr percent subst)
+
+  # Load required functions.
+  autoload -Uz add-zsh-hook
+
+  # Add hook for calling git-info before each command.
+  add-zsh-hook precmd prompt_north_precmd
+
+  # Virtualenv info
+  zstyle ':prezto:module:python:info:virtualenv' format '%F{blue}(%f%F{magenta}%v%F{blue})%f─'
+
+  # Code info
+  zstyle ':prezto:module:editor:info:completing' format '%B%F{red}...%f%b'
+  zstyle ':prezto:module:editor:info:keymap:primary' format ' %B%F{red}❯%F{yellow}❯%F{green}❯%f%b'
+  zstyle ':prezto:module:editor:info:keymap:primary:overwrite' format ' %F{red}♺%f'
+  zstyle ':prezto:module:editor:info:keymap:alternate' format ' %B%F{green}❮%F{yellow}❮%F{red}❮%f%b'
+  zstyle ':prezto:module:git:info:action' format ':%%B%F{yellow}%s%f%%b'
+  zstyle ':prezto:module:git:info:added' format ' %%B%F{green}✚%f%%b'
+  zstyle ':prezto:module:git:info:ahead' format ' %%B%F{yellow}⬆%f%%b'
+  zstyle ':prezto:module:git:info:behind' format ' %%B%F{yellow}⬇%f%%b'
+  zstyle ':prezto:module:git:info:branch' format '%F{magenta}%b%f'
+  zstyle ':prezto:module:git:info:commit' format '%F{magenta}%.7c%f'
+  zstyle ':prezto:module:git:info:deleted' format ' %%B%F{red}✖%d%f%%b'
+  zstyle ':prezto:module:git:info:modified' format ' %%B%F{blue}✱%f%%b'
+  zstyle ':prezto:module:git:info:position' format ':%F{red}%p%f'
+  zstyle ':prezto:module:git:info:renamed' format ' %%B%F{magenta}➜%f%%b'
+  zstyle ':prezto:module:git:info:stashed' format ' %%B%F{cyan}✭%f%%b'
+  zstyle ':prezto:module:git:info:unmerged' format ' %%B%F{yellow}═%f%%b'
+  zstyle ':prezto:module:git:info:untracked' format ' %%B%F{white}◼%f%%b'
+  zstyle ':prezto:module:git:info:keys' format \
+    'prompt' '%F{yellow}git %%B%b%%b%F{green}@%c─'\
+    'rprompt' '%A%B%S%a%m%r%U%u'
+
+  local blue_ob="%B%F{blue}[%f%b"
+  local blue_cb="%B%F{blue}]%f%b"
+  local blue_op="%B%F{blue}%(%f%b"
+  local blue_cp="%B%F{blue}%)%f%b"
+  local path_p="${blue_ob}%F{red}%~%b${blue_cb}"
+  local user_host="${blue_ob}%F{green}%n%f%F{magenta}@%F{green}%m${blue_cb}"
+  local ret_status="${blue_ob}%F{yellow}ret:%?${blue_cb}"
+  local hist_no="${blue_ob}%F{yellow}hist:%h${blue_cb}"
+  local panic="${blue_ob}%(?.%{%F{green}%}%BDON'T PANIC%b%{$reset_color%}.%{%F{red}%}>> PANIC <<%{$reset_color%})${blue_cb}"
+  local smiley="%(?.%{%F{green}%}:%)%{$reset_color%}.%{%F{red}%}:(%{$reset_color%})"
+  local expanded="${user_host}─${path_p}─${panic}-${ret_status}─${hist_no}"
+
+
+  # Define prompts.
+  PROMPT='╭─${python_info[virtualenv]}${git_info:+${(e)git_info[prompt]}}'$expanded'
+╰─${editor_info[keymap]}$reset_color '
+
+  RPROMPT='${editor_info[overwrite]}%(?:: %F{red}⏎%f)${VIM:+" %B%F{green}V%f%b"}${git_info[rprompt]}'
+  SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
+}
+
+prompt_north_setup "$@"
+

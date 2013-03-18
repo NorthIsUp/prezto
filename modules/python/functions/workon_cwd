@@ -1,0 +1,25 @@
+# Automatically activate Git projects' virtual environments based on the
+# directory name of the project. Virtual environment name can be overridden
+# by placing a .venv file in the project root with a virtualenv name in it
+
+[[ $DISABLE_VENV_CD -eq 1 ]] && exit
+
+# Check that this is a Git repo
+PROJECT_ROOT=`git rev-parse --show-toplevel 2> /dev/null`
+if (( $? == 0 )); then
+    # Check for virtualenv name override
+    [[ -f "$PROJECT_ROOT/.venv" ]] && ENV_NAME=`cat "$PROJECT_ROOT/.venv"`
+    ENV_NAME=${ENV_NAME:-${PROJECT_ROOT:t}}
+
+    # Activate the environment only if it is not already active
+    if [[ "$VIRTUAL_ENV" != "$WORKON_HOME/$ENV_NAME" ]]; then
+        if [[ -e "$WORKON_HOME/$ENV_NAME/bin/activate" ]]; then
+            workon "$ENV_NAME" && export CD_VIRTUAL_ENV="$ENV_NAME"
+        fi
+    fi
+elif [ $CD_VIRTUAL_ENV ]; then
+    # We've just left the repo, deactivate the environment
+    # Note: this only happens if the virtualenv was activated automatically
+    deactivate && unset CD_VIRTUAL_ENV
+fi
+unset PROJECT_ROOT
